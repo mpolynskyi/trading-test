@@ -1,9 +1,6 @@
 .env
 .venv
-tests/reports/test_report.html
-tests/tests/reports/
-tests/tests/reports/api_test_report.html
-tests/tests/reports/websockets_test_report.html
+tests/reports/
 .idea/
 __pycache__/
 server/__pycache__/
