@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: fastapi_server
+    ports:
+      - "8000:8000"
+    networks:
+      - test_network
+    environment:
+      - MONGO_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
+
+
+  tests:
+    build:
+      context: .
+      dockerfile: tests/Dockerfile
+    container_name: test_runner
+    depends_on:
+      - server
+    volumes:
+      - ./tests:/tests  # Mount local reports directory
+    networks:
+      - test_network
+    environment:
+      - MONGO_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
+
+
+
+networks:
+  test_network:
+    driver: bridge

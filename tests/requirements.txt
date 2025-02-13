@@ -1,0 +1,10 @@
+pytest==8.3.4
+requests==2.32.3
+requests-toolbelt==1.0.0
+websockets==14.2
+Faker==36.1.0
+pymongo[srv]==4.11.1
+certifi
+pytest-html==4.1.1
+pytest-xdist==3.6.1
+pytest-asyncio==0.25.3

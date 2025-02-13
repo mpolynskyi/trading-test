@@ -1,0 +1,4 @@
+.env
+.venv
+tests/tests/reports
+.idea
