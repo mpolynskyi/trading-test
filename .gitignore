@@ -1,6 +1,6 @@
 .env
 .venv
-tests/tests/reports
+tests/tests/reports/
 .idea/*
 __pycache__/
 server/__pycache__/
