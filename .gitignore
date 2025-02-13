@@ -1,6 +1,8 @@
+.env
 .venv
+/tests/reports/test_report.html
 tests/tests/reports/
-.idea/*
+.idea/
 __pycache__/
 server/__pycache__/
 tests/__pycache__/
