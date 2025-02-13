@@ -7,7 +7,7 @@ from helpers.api_helpers import create_order, get_order, get_orders, cancel_orde
 def test_create_valid_order(api_client, order_status):
     """Test placing an order."""
     order = create_order(api_client, stoks="USDEUR", quantity=12)
-    assert order.status_code == 201, "response code should be 201"
+    assert order.status_code == 201, "response code should be 201 for creating valid order"
     order_data = order.json()
     assert "orderId" in order_data, "orderId key should be in response json"
     assert order_data["orderStatus"] == order_status.PENDING, "orderStatus should be pending right after creating order"
@@ -30,7 +30,7 @@ def test_create_order_without_required_body_fields(api_client, custom_order_data
     2. Assert it was prevented
     """
     order = create_order(api_client, custom_order_data=custom_order_data)
-    assert order.status_code == 422
+    assert order.status_code == 422, "response code should be 422 after trying to create invalid order"
     error_data = order.json()
 
     # Extract error details from response
@@ -45,7 +45,7 @@ def test_create_order_without_required_body_fields(api_client, custom_order_data
         for field in expected_missing_fields
     }
 
-    assert response_errors == expected_errors
+    assert response_errors == expected_errors, "unexpected errors returned after trying to create invalid order"
 
 
 @pytest.mark.api
@@ -57,16 +57,16 @@ def test_get_new_order(api_client):
     3. Assert it was created successfully.
     """
     order = create_order(api_client, stoks="AUDEUR", quantity=120)
-    assert order.status_code == 201
+    assert order.status_code == 201, "response code should be 201 for creating valid order"
     order_data = order.json()
     order_id = order_data["orderId"]
 
     retrieved_order_response = get_order(api_client, order_id)
-    assert retrieved_order_response.status_code == 200
+    assert retrieved_order_response.status_code == 200, "response code should be 200 for retrieving valid order"
     retrieved_order_data = retrieved_order_response.json()
-    assert retrieved_order_data["orderId"] == order_id
-    assert retrieved_order_data["stoks"] == "AUDEUR"
-    assert retrieved_order_data["quantity"] == 120.0
+    assert retrieved_order_data["orderId"] == order_id, "Order id should be retrieved correctly"
+    assert retrieved_order_data["stoks"] == "AUDEUR", "Stoks key should be retrieved correctly"
+    assert retrieved_order_data["quantity"] == 120.0, "Quantity should be retrieved correctly"
 
 
 @pytest.mark.api
@@ -77,9 +77,9 @@ def test_get_existing_order(api_client, get_order_fixture):
     2. Assert data was retrieved successfully.
     """
     retrieved_order_response = get_order(api_client, get_order_fixture['orderId'])
-    assert retrieved_order_response.status_code == 200
+    assert retrieved_order_response.status_code == 200, "response code should be 200 for retrieving valid order"
     retrieved_order_data = retrieved_order_response.json()
-    assert retrieved_order_data == get_order_fixture
+    assert retrieved_order_data == get_order_fixture, "Order data from response not the same as order data from fixture!"
 
 
 @pytest.mark.api
@@ -91,9 +91,9 @@ def test_get_order_that_does_not_exist(api_client, faker):
     """
     fake_uuid = faker.uuid4()
     retrieved_order_response = get_order(api_client, fake_uuid)
-    assert retrieved_order_response.status_code == 404
+    assert retrieved_order_response.status_code == 404, "Retrive order should not exist and return 404!"
     error_message = retrieved_order_response.json()
-    assert error_message['detail'] == "Order not found"
+    assert error_message['detail'] == "Order not found", "Details for not existing order are wrong!"
     print(error_message)
 
 
@@ -106,11 +106,11 @@ def test_cancel_pending_order(api_client, order_status, pending_order_data_fixtu
     3. assert it was canceled
     """
     cancel_order_response = cancel_order(api_client, pending_order_data_fixture['orderId'])
-    assert cancel_order_response.status_code == 204
+    assert cancel_order_response.status_code == 204, "cancel pending order should return 204 status code"
 
     get_canceled_order_response = get_order(api_client, pending_order_data_fixture['orderId'])
 
-    assert get_canceled_order_response.status_code == 200
+    assert get_canceled_order_response.status_code == 200, "response code should be 200 for retrieving canceled order"
     canceled_order_data = get_canceled_order_response.json()
     assert canceled_order_data["orderStatus"] == order_status.CANCELED, f"order with id {pending_order_data_fixture['order_id']} was not canceled, it's status {canceled_order_data['orderStatus']}"
     canceled_order_data.pop("orderStatus")
@@ -130,7 +130,7 @@ def test_cancel_not_pending_order(request, order, api_client, order_status):
     """
     order_data = request.getfixturevalue(order)
     cancel_order_response = cancel_order(api_client, order_data['orderId'])
-    assert cancel_order_response.status_code == 400
+    assert cancel_order_response.status_code == 400, "response code should be 400 for canceled not cancelable order!"
     assert cancel_order_response.json() == {'detail': f'Only pending orders can be canceled. Current status: {order_data["orderStatus"]}'}, "unexpected error message during cancel uncancellable order"
 
 
@@ -142,9 +142,9 @@ def test_get_all_orders(api_client, get_all_orders_fixture):
     2. assert there is orders and they have valid data
     """
     retrieved_orders_response = get_orders(api_client)
-    assert retrieved_orders_response.status_code == 200
+    assert retrieved_orders_response.status_code == 200, "response code should be 200 when retrieving all orders"
     retrieved_orders_data = retrieved_orders_response.json()
-    assert len(retrieved_orders_data) != 0
+    assert len(retrieved_orders_data) != 0, "get all orders not returned orders!"
     for order in retrieved_orders_data:
         assert 'orderId' in order, "Missing orderId"
         assert 'orderStatus' in order, "Missing orderStatus"

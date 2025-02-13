@@ -21,18 +21,18 @@ async def test_websocket_order_updates(api_client, order_status, ws_url):
     """
     async with websockets.connect(ws_url) as websocket:
         order_response = create_order(api_client, stoks="EURUSD", quantity=100.5)
-        assert order_response.status_code == 201
+        assert order_response.status_code == 201, "create valid order not returned status 201 code"
         order_id = order_response.json()["orderId"]
 
         # First message: Order created with status PENDING
         pending_message = json.loads(await websocket.recv())
-        assert pending_message["orderId"] == order_id
-        assert pending_message["orderStatus"] == order_status.PENDING
+        assert pending_message["orderId"] == order_id, "unexpected orderId! Check if this test isolated"
+        assert pending_message["orderStatus"] == order_status.PENDING, f"orderStatus should be {order_status.PENDING} for new order! Check if this test isolated"
 
         # Second message: Order executed
         executed_message = json.loads(await websocket.recv())
-        assert executed_message["orderId"] == order_id
-        assert executed_message["orderStatus"] == order_status.EXECUTED
+        assert executed_message["orderId"] == order_id, "unexpected orderId! Check if this test isolated! Check if this test isolated"
+        assert executed_message["orderStatus"] == order_status.EXECUTED, f"orderStatus should be {order_status.EXECUTED} for new order! Check if this test isolated"
 
 
 @pytest.mark.websockets
@@ -42,13 +42,13 @@ async def test_websocket_order_cancel(pending_order_data_fixture, api_client, or
     1. Create fixture order
     2. Immediately cancel order.
     3. Validate real-time WebSocket message about cancel order.
-    """
+    """ "create valid order not returned status 201 code"
     async with websockets.connect(ws_url) as websocket:
         cancel_order_response = cancel_order(api_client, pending_order_data_fixture['orderId'])
-        assert cancel_order_response.status_code == 204
+        assert cancel_order_response.status_code == 204, "cancel cancellable order not returned status 204!"
         cancel_message = json.loads(await websocket.recv())
-        assert cancel_message["orderId"] == pending_order_data_fixture['orderId']
-        assert cancel_message["orderStatus"] == order_status.CANCELED
+        assert cancel_message["orderId"] == pending_order_data_fixture['orderId'], "unexpected orderId! Check if this test isolated! Check if this test isolated"
+        assert cancel_message["orderStatus"] == order_status.CANCELED, f"orderStatus should be {order_status.CANCELED} after cancel {order_status.PENDING} order! Check if this test isolated"
 
 
 @pytest.mark.asyncio
@@ -68,7 +68,7 @@ async def test_websocket_performance(api_client, ws_url, order_status):
         # Use asyncio.to_thread to run create_order in a thread pool
         async def send_order():
             response = await asyncio.to_thread(create_order, api_client, stoks="EURUSD", quantity=100.5)
-            assert response.status_code == 201
+            assert response.status_code == 201, "create valid order not returned status 201 code"
             order_id = response.json()["orderId"]
             order_ids.append(order_id)
             timestamps[order_id] = time.time()
