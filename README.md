@@ -19,3 +19,4 @@ in `tests/reports` folder
 
 ## Improve points
 * allure reporting
+* local mongo container

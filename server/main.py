@@ -7,20 +7,14 @@ import random
 from pydantic import BaseModel, Field
 from motor.motor_asyncio import AsyncIOMotorClient
 import certifi
-import uvicorn
+import logging
 
+LOGGER = logging.getLogger(__name__)
 
 class OrderStatus:
     PENDING = "pending"
     EXECUTED = "executed"
     CANCELED = "canceled"
-
-
-app = FastAPI(
-    title="Trading Platform API",
-    description="Sample RESTful API server that exposes a set of endpoints to simulate a trading platform.",
-    version="1"
-)
 
 MONGO_URI = os.getenv("MONGO_CONNECTION_STRING")
 client = AsyncIOMotorClient(MONGO_URI, tlsCAFile=certifi.where())
@@ -28,14 +22,24 @@ db = client.trading
 orders_collection = db.orders
 orders_collection.create_index([("orderId", 1)], unique=True)
 
+websocket_clients = set()
+
+app = FastAPI(
+    title="Trading Platform API",
+    description="Sample RESTful API server that exposes a set of endpoints to simulate a trading platform.",
+    version="1"
+)
+
+async def short_delay():
+    """
+    short delay for simulation of processing request
+    """
+    await asyncio.sleep(random.uniform(0.1, 1))
 
 class CreateOrderRequest(BaseModel):
     """Request model for creating an order."""
     stoks: str
     quantity: float = Field(gt=0, description="Quantity must be greater than zero")
-
-
-websocket_clients = set()
 
 
 async def broadcast_order_update(order_id: str, order_status: str):
@@ -44,13 +48,18 @@ async def broadcast_order_update(order_id: str, order_status: str):
     for client in websocket_clients.copy():
         try:
             await client.send_json(update)
-        except Exception:
+        except (ConnectionResetError, asyncio.CancelledError) as e:
+            LOGGER.warning(f"WebSocket client disconnected: {e}")
             websocket_clients.remove(client)
+        except Exception as e:
+            logging.error(f"Unexpected error during sending WebSocket message: {e}")
+            websocket_clients.remove(client)
+            raise
 
 
 @app.get("/orders", status_code=200)
 async def get_orders() -> list:
-    await asyncio.sleep(random.uniform(0.1, 1))
+    await short_delay()
     orders = await orders_collection.find().to_list(length=None)
     return [{"orderId": str(order["orderId"]), "stoks": order['stoks'], "quantity": order['quantity'],
              "orderStatus": order['orderStatus']} for order in orders]
@@ -58,7 +67,7 @@ async def get_orders() -> list:
 
 @app.post("/orders", status_code=201)
 async def create_order(order: CreateOrderRequest) -> dict:
-    await asyncio.sleep(random.uniform(0.1, 1))
+    await short_delay()
     order_id = str(uuid4())
     new_order = {"orderId": order_id, "stoks": order.stoks, "quantity": order.quantity,
                  "orderStatus": OrderStatus.PENDING}
@@ -70,7 +79,7 @@ async def create_order(order: CreateOrderRequest) -> dict:
 
 @app.get("/orders/{order_id}", status_code=200)
 async def get_order(order_id: str) -> dict:
-    await asyncio.sleep(random.uniform(0.1, 1))
+    await short_delay()
     order = await orders_collection.find_one({"orderId": order_id})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
@@ -80,7 +89,7 @@ async def get_order(order_id: str) -> dict:
 
 @app.delete("/orders/{order_id}", status_code=204)
 async def cancel_order(order_id: str) -> None:
-    await asyncio.sleep(random.uniform(0.1, 1))
+    await short_delay()
     order = await orders_collection.find_one({"orderId": order_id})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
