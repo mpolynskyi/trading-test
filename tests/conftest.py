@@ -3,21 +3,19 @@ from requests.adapters import HTTPAdapter
 from requests_toolbelt import sessions
 from random import randint
 from pymongo import MongoClient
-import certifi
 from helpers.db_helpers import populate_test_data_in_db, clean_test_data
 from urllib.parse import urljoin
-import os
 
 
 @pytest.fixture(scope="session")
 def mongo_connection_string():
-    url = os.getenv("MONGO_CONNECTION_STRING")
+    url = "mongodb://mongo:27017/trading" #  not very dynamic but for this project - ok
     return url
 
 
 @pytest.fixture(scope="session")
 def orders_collection(request, mongo_connection_string):
-    client = MongoClient(mongo_connection_string, tlsCAFile=certifi.where())
+    client = MongoClient(mongo_connection_string)
     db = client.trading
     yield db.orders
     client.close()

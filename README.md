@@ -3,10 +3,6 @@ api specifications in `server/openapi3.yaml` <br>
 
 ## requirements
 * `docker` <br>
-* `.env` file in project root directory with mongo connection string: <br>
-```dotenv
-MONGO_CONNECTION_STRING=mongodb+srv://user:password@your.db.mongodb.net
-```
 
 ## how to run server + tests:
 `docker compose up`
@@ -19,4 +15,3 @@ in `tests/reports` folder
 
 ## Improve points
 * allure reporting
-* local mongo container

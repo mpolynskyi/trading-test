@@ -6,12 +6,12 @@ services:
       context: .
       dockerfile: server/Dockerfile
     container_name: fastapi_server
+    depends_on:
+      - mongo
     ports:
       - "8000:8000"
     networks:
       - test_network
-    environment:
-      - MONGO_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
 
 
   tests:
@@ -21,14 +21,24 @@ services:
     container_name: test_runner
     depends_on:
       - server
+      - mongo
     volumes:
       - ./tests:/tests  # Mount local reports directory
     networks:
       - test_network
-    environment:
-      - MONGO_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
 
 
+  mongo:
+    image: mongo
+    container_name: local_mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    networks:
+      - test_network
+    command:
+      - '--logpath'
+      - '/var/log/mongodb/mongod.log'
 
 networks:
   test_network:
