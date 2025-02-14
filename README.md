@@ -1,6 +1,11 @@
 ## api and websoket tests for custom api
 api specifications in `server/openapi3.yaml` <br>
 
+## get repo:
+```
+git clone git@github.com:mpolynskyi/trading-test.git
+```
+
 ## requirements
 * `docker` <br>
 * `.env` file in project root directory with mongo connection string: <br>
@@ -9,7 +14,10 @@ MONGO_CONNECTION_STRING=mongodb+srv://user:password@your.db.mongodb.net
 ```
 
 ## how to run server + tests:
-`docker compose up`
+```
+docker compose up
+```
+
 
 ## where reports?
 in `tests/reports` folder
@@ -19,4 +27,4 @@ in `tests/reports` folder
 
 ## Improve points
 * allure reporting
-* local mongo container
+* local mongo container (done in `local-mongo` branch)
