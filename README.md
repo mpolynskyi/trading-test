@@ -1,6 +1,10 @@
 ## api and websoket tests for custom api
 api specifications in `server/openapi3.yaml` <br>
 
+## Difference with `main` branch:
+This using local mongo instead of remote so be ready to download +800mb
+
+
 ## requirements
 * `docker` <br>
 
