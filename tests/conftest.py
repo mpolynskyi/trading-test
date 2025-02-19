@@ -1,3 +1,4 @@
+import httpx
 import pytest
 from requests.adapters import HTTPAdapter
 from requests_toolbelt import sessions
@@ -46,6 +47,11 @@ def api_client(base_url):
     client.mount('http://', adapter)
     client.mount('https://', adapter)
     yield client
+
+
+@pytest.fixture(scope="session")
+def async_api_client(base_url):
+    return httpx.AsyncClient(base_url=base_url)
 
 
 @pytest.fixture(autouse=True)

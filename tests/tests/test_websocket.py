@@ -1,8 +1,8 @@
-import asyncio
 import pytest
 import time
 import websockets
-from helpers.api_helpers import create_order, cancel_order
+import asyncio
+from helpers.api_helpers import create_order, cancel_order, async_create_order
 from statistics import mean, stdev
 import json
 import logging
@@ -54,7 +54,7 @@ async def test_websocket_order_cancel(pending_order_data_fixture, api_client, or
 @pytest.mark.asyncio
 @pytest.mark.websockets
 @pytest.mark.websockets_performance
-async def test_websocket_performance(api_client, ws_url, order_status):
+async def test_websocket_performance(async_api_client, ws_url, order_status):
     """
     Performance test:
     1. Place 100 orders simultaneously.
@@ -65,9 +65,8 @@ async def test_websocket_performance(api_client, ws_url, order_status):
         order_ids = []
         timestamps = {}
 
-        # Use asyncio.to_thread to run create_order in a thread pool
         async def send_order():
-            response = await asyncio.to_thread(create_order, api_client, stoks="EURUSD", quantity=100.5)
+            response = await async_create_order(async_api_client, stoks="EURUSD", quantity=100.5)
             assert response.status_code == 201, "create valid order not returned status 201 code"
             order_id = response.json()["orderId"]
             order_ids.append(order_id)
