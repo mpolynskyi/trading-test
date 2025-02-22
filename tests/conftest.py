@@ -4,21 +4,19 @@ from requests.adapters import HTTPAdapter
 from requests_toolbelt import sessions
 from random import randint
 from pymongo import MongoClient
-import certifi
 from helpers.db_helpers import populate_test_data_in_db, clean_test_data
 from urllib.parse import urljoin
-import os
 
 
 @pytest.fixture(scope="session")
 def mongo_connection_string():
-    url = os.getenv("MONGO_CONNECTION_STRING")
+    url = "mongodb://mongo:27017/trading" #  not very dynamic but for this project - ok
     return url
 
 
 @pytest.fixture(scope="session")
 def orders_collection(request, mongo_connection_string):
-    client = MongoClient(mongo_connection_string, tlsCAFile=certifi.where())
+    client = MongoClient(mongo_connection_string)
     db = client.trading
     yield db.orders
     client.close()
@@ -76,6 +74,7 @@ def order_status():
 @pytest.fixture(scope="function")
 def pending_order_data_fixture(orders_collection):
     data = {"orderId": "test_pending", "stoks": "EURUSD", "quantity": 100.4, "orderStatus": OrderStatus.PENDING}
+    clean_test_data(orders_collection, data['orderId'])
     populate_test_data_in_db(orders_collection, data)
     yield data
     clean_test_data(orders_collection, data['orderId'])
@@ -84,6 +83,7 @@ def pending_order_data_fixture(orders_collection):
 @pytest.fixture(scope="function")
 def executed_order_data_fixture(orders_collection):
     data = {"orderId": "test_executed", "stoks": "EURUSD", "quantity": 200.2, "orderStatus": OrderStatus.EXECUTED}
+    clean_test_data(orders_collection, data['orderId'])
     populate_test_data_in_db(orders_collection, data)
     yield data
     clean_test_data(orders_collection, data['orderId'])
@@ -92,6 +92,7 @@ def executed_order_data_fixture(orders_collection):
 @pytest.fixture(scope="function")
 def canceled_order_data_fixture(orders_collection):
     data = {"orderId": "test_canceled", "stoks": "EURUSD", "quantity": 300.3, "orderStatus": OrderStatus.CANCELED}
+    clean_test_data(orders_collection, data['orderId'])
     populate_test_data_in_db(orders_collection, data)
     yield data
     clean_test_data(orders_collection, data['orderId'])
@@ -100,6 +101,7 @@ def canceled_order_data_fixture(orders_collection):
 @pytest.fixture(scope="function")
 def get_order_fixture(orders_collection):
     data = {"orderId": "test_get_order", "stoks": "EURUSD", "quantity": 400, "orderStatus": OrderStatus.PENDING}
+    clean_test_data(orders_collection, data['orderId'])
     populate_test_data_in_db(orders_collection, data)
     yield data
     clean_test_data(orders_collection, data['orderId'])
@@ -108,6 +110,7 @@ def get_order_fixture(orders_collection):
 @pytest.fixture(scope="function")
 def get_all_orders_fixture(orders_collection):
     data = {"orderId": "test_get_all_orders", "stoks": "EURUSD", "quantity": 400, "orderStatus": OrderStatus.PENDING}
+    clean_test_data(orders_collection, data['orderId'])
     populate_test_data_in_db(orders_collection, data)
     yield data
     clean_test_data(orders_collection, data['orderId'])

@@ -1,12 +1,9 @@
-import os
-
 from fastapi import FastAPI, WebSocket, HTTPException, WebSocketDisconnect, Depends
 from uuid import uuid4
 import asyncio
 import random
 from pydantic import BaseModel, Field
 from motor.motor_asyncio import AsyncIOMotorClient
-import certifi
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -16,8 +13,9 @@ class OrderStatus:
     EXECUTED = "executed"
     CANCELED = "canceled"
 
-MONGO_URI = os.getenv("MONGO_CONNECTION_STRING")
-client = AsyncIOMotorClient(MONGO_URI, tlsCAFile=certifi.where())
+
+MONGO_URI = "mongodb://mongo:27017/trading"  #  not very dynamic but for this project - ok
+client = AsyncIOMotorClient(MONGO_URI)
 db = client.trading
 orders_collection = db.orders
 orders_collection.create_index([("orderId", 1)], unique=True)

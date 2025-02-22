@@ -8,10 +8,6 @@ git clone git@github.com:mpolynskyi/trading-test.git
 
 ## requirements
 * `docker` <br>
-* `.env` file in project root directory with mongo connection string: <br>
-```dotenv
-MONGO_CONNECTION_STRING=mongodb+srv://user:password@your.db.mongodb.net
-```
 
 ## how to run server + tests:
 ```
@@ -27,4 +23,3 @@ in `tests/reports` folder
 
 ## Improve points
 * allure reporting
-* local mongo container (done in `local-mongo` branch)
