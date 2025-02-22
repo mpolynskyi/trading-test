@@ -7,3 +7,5 @@ server/__pycache__/
 tests/__pycache__/
 tests/helpers/__pycache__/
 tests/tests/__pycache__/
+.DS_store
+tests/.DS_store
