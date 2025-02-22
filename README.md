@@ -1,5 +1,8 @@
-## api and websoket tests for custom api
-api specifications in `server/openapi3.yaml` <br>
+## What is it?  
+Test task for the SDET position. Full requirements are in the `requirements` folder.  
+
+## What if I don't want to read the requirements?  
+In short, it's API and WebSocket tests for a custom API. Develop API is also test task. API specifications are in `server/openapi3.yaml`.
 
 ## get repo:
 ```
