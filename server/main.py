@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, HTTPException, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, HTTPException, WebSocketDisconnect, Depends
 from uuid import uuid4
 import asyncio
 import random
@@ -34,6 +34,7 @@ async def short_delay():
     """
     await asyncio.sleep(random.uniform(0.1, 1))
 
+
 class CreateOrderRequest(BaseModel):
     """Request model for creating an order."""
     stoks: str
@@ -55,17 +56,15 @@ async def broadcast_order_update(order_id: str, order_status: str):
             raise
 
 
-@app.get("/orders", status_code=200)
+@app.get("/orders", status_code=200, dependencies=[Depends(short_delay)])
 async def get_orders() -> list:
-    await short_delay()
     orders = await orders_collection.find().to_list(length=None)
     return [{"orderId": str(order["orderId"]), "stoks": order['stoks'], "quantity": order['quantity'],
              "orderStatus": order['orderStatus']} for order in orders]
 
 
-@app.post("/orders", status_code=201)
+@app.post("/orders", status_code=201, dependencies=[Depends(short_delay)])
 async def create_order(order: CreateOrderRequest) -> dict:
-    await short_delay()
     order_id = str(uuid4())
     new_order = {"orderId": order_id, "stoks": order.stoks, "quantity": order.quantity,
                  "orderStatus": OrderStatus.PENDING}
@@ -75,9 +74,8 @@ async def create_order(order: CreateOrderRequest) -> dict:
     return {"orderId": order_id, "stoks": order.stoks, "quantity": order.quantity, "orderStatus": OrderStatus.PENDING}
 
 
-@app.get("/orders/{order_id}", status_code=200)
+@app.get("/orders/{order_id}", status_code=200, dependencies=[Depends(short_delay)])
 async def get_order(order_id: str) -> dict:
-    await short_delay()
     order = await orders_collection.find_one({"orderId": order_id})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
@@ -85,9 +83,8 @@ async def get_order(order_id: str) -> dict:
             "orderStatus": order['orderStatus']}
 
 
-@app.delete("/orders/{order_id}", status_code=204)
+@app.delete("/orders/{order_id}", status_code=204, dependencies=[Depends(short_delay)])
 async def cancel_order(order_id: str) -> None:
-    await short_delay()
     order = await orders_collection.find_one({"orderId": order_id})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")

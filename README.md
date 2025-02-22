@@ -1,15 +1,19 @@
 ## api and websoket tests for custom api
 api specifications in `server/openapi3.yaml` <br>
 
-## Difference with `main` branch:
-This using local mongo instead of remote so be ready to download +800mb
-
+## get repo:
+```
+git clone git@github.com:mpolynskyi/trading-test.git
+```
 
 ## requirements
 * `docker` <br>
 
 ## how to run server + tests:
-`docker compose up`
+```
+docker compose up
+```
+
 
 ## where reports?
 in `tests/reports` folder
